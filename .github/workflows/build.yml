@@ -52,7 +52,7 @@ jobs:
       - name: Check files before uploading
         run: |
           echo "Checking for .deb files:"
-          ls /home/*.deb || echo "No .deb files found"
+          ls /home/runner/*.deb || echo "No .deb files found"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -61,4 +61,4 @@ jobs:
           path: |
             ~/rpmbuild/RPMS/
             ~/rpmbuild/SRPMS/
-            /home/*.deb
+            /home/runner*.deb
