@@ -1,0 +1,64 @@
+name: Build RPM and DEB packages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup build environment
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential rpm devscripts dpkg
+
+      - name: Prepare RPM directories
+        run: |
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp ./counter.sh ~/rpmbuild/SOURCES/
+          cp ./counter.spec ~/rpmbuild/SPECS/
+
+      - name: Build RPM package
+        run: |
+          rpmbuild -ba ~/rpmbuild/SPECS/counter.spec
+
+      - name: Build DEB package
+        run: |
+          set -e
+          echo "Building DEB package"
+          mkdir -p ~/deb-package/usr/local/bin
+          cp counter.sh ~/deb-package/usr/local/bin/
+          mkdir -p ~/deb-package/DEBIAN
+          echo "Package: counter
+          Version: 1.0-2
+          Architecture: all
+          Maintainer: Maxxksim
+          Description: A script to count files excluding directories and links in /etc" > ~/deb-package/DEBIAN/control
+          echo "Contents of ~/deb-package before dpkg-deb:"
+          ls -lR ~/deb-package
+          dpkg-deb --build ~/deb-package
+          echo "Contents of ~/deb-package after dpkg-deb:"
+          ls -lR ~/deb-package
+
+      - name: Check files before uploading
+        run: |
+          echo "Checking for .deb files:"
+          ls /home/*.deb || echo "No .deb files found"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: |
+            ~/rpmbuild/RPMS/
+            ~/rpmbuild/SRPMS/
+            /home/*.deb
