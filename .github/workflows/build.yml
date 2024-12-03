@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -20,27 +20,24 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y build-essential rpm devscripts dpkg
-
       - name: Prepare RPM directories
         run: |
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-          cp ./counter.sh ~/rpmbuild/SOURCES/
-          cp ./counter.spec ~/rpmbuild/SPECS/
-
+          cp counter.sh ~/rpmbuild/SOURCES/
+          cp counter.spec ~/rpmbuild/SPECS/
       - name: Build RPM package
         run: |
           rpmbuild -ba ~/rpmbuild/SPECS/counter.spec
-
       - name: Build DEB package
         run: |
           set -e
           echo "Building DEB package"
           mkdir -p ~/deb-package/usr/local/bin
-          cp counter.sh ~/deb-package/usr/local/bin/
+          cp scripts/count_files.sh ~/deb-package/usr/local/bin/
           mkdir -p ~/deb-package/DEBIAN
           echo "Package: counter
           Version: 1.0-2
-          Architecture: all
+          Architecture: amd64
           Maintainer: Maxxksim
           Description: A script to count files excluding directories and links in /etc" > ~/deb-package/DEBIAN/control
           echo "Contents of ~/deb-package before dpkg-deb:"
@@ -48,17 +45,15 @@ jobs:
           dpkg-deb --build ~/deb-package
           echo "Contents of ~/deb-package after dpkg-deb:"
           ls -lR ~/deb-package
-
       - name: Check files before uploading
         run: |
           echo "Checking for .deb files:"
-          ls ~/deb-package/*.deb || echo "No .deb files found"
-
+          ls /home/runner/*.deb || echo "No .deb files found"
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: packages
           path: |
             ~/rpmbuild/RPMS/
             ~/rpmbuild/SRPMS/
-            ~/deb-package/*.deb
+            /home/runner/*.deb
