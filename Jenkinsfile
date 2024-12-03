@@ -14,28 +14,29 @@ pipeline {
         stage('Download DEB package') {
             steps {
                 sh '''
-                    curl -L https://github.com/Maxxksim/sysprog-os-admin-labs/raw/main/packages/counter-1.0-2.deb -o /tmp/counter-1.0-2.deb
+                    curl -L https://github.com/Maxxksim/sysprog-os-admin-labs/raw/main/deb-package.deb -o deb-packgae.deb
                 '''
             }
         }
         stage('Install DEB') {
             steps {
                 sh '''
-                    sudo dpkg -i /tmp/counter-1.0-2.deb
+                    sudo dpkg -i deb-packgae.deb
                 '''
             }
         }
         stage('Download script') {
             steps {
                 sh '''
-                    curl -L https://github.com/Maxxksim/sysprog-os-admin-labs/raw/main/scripts/counter.sh -o /tmp/counter.sh
-                    chmod +x /tmp/counter.sh
+                    curl -L https://github.com/Maxxksim/sysprog-os-admin-labs/raw/main/counter.sh -o counter.sh
+                    chmod +x counter.sh
+                    sudo mv counter.sh /usr/local/bin/counter
                 '''
             }
         }
         stage('Run script') {
             steps {
-                sh '/tmp/counter.sh'
+                sh 'counter.sh'
             }
         }
     }
