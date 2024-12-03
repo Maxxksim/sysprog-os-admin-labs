@@ -33,7 +33,7 @@ jobs:
           set -e
           echo "Building DEB package"
           mkdir -p ~/deb-package/usr/local/bin
-          cp scripts/count_files.sh ~/deb-package/usr/local/bin/
+          cp counter.sh ~/deb-package/usr/local/bin/
           mkdir -p ~/deb-package/DEBIAN
           echo "Package: counter
           Version: 1.0-2
